@@ -1,0 +1,26 @@
+# Node service
+node_modules/
+
+# environment
+.env
+
+# logs
+logs/
+*.log
+npm-debug.log*
+
+# build / dist
+/dist/
+/build/
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# db
+*.sqlite
+
+# lockfiles (optional)
+# package-lock.json
+# yarn.lock

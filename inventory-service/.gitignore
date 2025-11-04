@@ -1,0 +1,27 @@
+# Node service
+node_modules/
+
+# environment
+.env
+
+# uploaded files
+/uploads/
+uploads/
+
+# logs
+logs/
+*.log
+npm-debug.log*
+
+# build / dist
+/dist/
+/build/
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
+
+# lockfiles (optional)
+# package-lock.json
+# yarn.lock
