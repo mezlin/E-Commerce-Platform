@@ -7,6 +7,7 @@ interface Order {
   userId: string;
   products: Array<{ productId: string; quantity: number; price: number }>;
   totalAmount: number;
+  status: string;
   createdAt?: string;
 }
 
@@ -41,6 +42,7 @@ const OrdersPage: React.FC = () => {
                   <>
                     <div>Items: {order.products.length}</div>
                     <div>{order.createdAt ? `Created: ${new Date(order.createdAt).toLocaleString()}` : null}</div>
+                    <div>Status: {order.status}</div>
                   </>
                 }
               />

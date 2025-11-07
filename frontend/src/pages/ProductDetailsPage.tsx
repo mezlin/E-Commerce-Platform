@@ -55,7 +55,7 @@ const ProductDetailsPage: React.FC = () => {
             <CardMedia
               component="img"
               height={400}
-              image={product.image ? `http://localhost:4001${product.image}` : 'https://via.placeholder.com/400'}
+              image={`${process.env.REACT_APP_INVENTORY_API_URL}${product.image}` || 'https://via.placeholder.com/400'}
               alt={product.name}
               sx={{ width: '100%', objectFit: 'cover' }}
             />

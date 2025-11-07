@@ -4,14 +4,19 @@ const path = require("path");
 const dotenv = require("dotenv");
 
 // Determine which .env file to load
-const envFile = process.env.NODE_ENV === "production"
-? ".env.production"
-: ".env.development";
+const envFile =
+  process.env.NODE_ENV === "production"
+    ? ".env.production"
+    : ".env.development";
 
 dotenv.config({ path: path.resolve(__dirname, envFile) });
 
-const inventoryService = new ServiceCommunication(process.env.INVENTORY_SERVICE_URL);
-const paymentService = new ServiceCommunication(process.env.PAYMENT_SERVICE_URL);
+const inventoryService = new ServiceCommunication(
+  process.env.INVENTORY_SERVICE_URL
+);
+const paymentService = new ServiceCommunication(
+  process.env.PAYMENT_SERVICE_URL
+);
 
 // Create a new order
 exports.createOrder = async (req, res) => {
@@ -32,35 +37,70 @@ exports.createOrder = async (req, res) => {
       }
     }
 
-    // Create payment
-    const payment = await paymentService.makeRequest("POST", "/api/payments", {
-      amount: totalAmount,
-      userId,
-    });
-
-    if (!payment || payment.status !== "success") {
-      return res.status(400).json({
-        message: "Payment failed",
-      });
-    }
-
-    // Update inventory
-    for (const product of products) {
-      await inventoryService.makeRequest(
-        "PUT",
-        `/api/products/${product.productId}/reduce-stock`,
-        { quantity: product.quantity }
-      );
-    }
-
-    // Create order
+    // Create order first (initially pending)
     const order = new Order({
       userId,
       products,
       totalAmount,
-      paymentId: payment.id,
-      status: "confirmed",
+      status: "pending",
     });
+
+    await order.save();
+    console.log("Order created with ID:", order._id);
+
+    console.log(`Creating new payment for order ${order._id}`);
+    // Create payment
+    let payment;
+    try {
+      payment = await paymentService.makeRequest("POST", "/api/payments", {
+        orderId: String(order._id),
+        amount: totalAmount,
+        userId,
+        paymentMethod: "credit_card",
+        currency: "USD",
+      });
+
+      if (!payment || payment.status !== "completed") {
+        order.status = "failed";
+        await order.save();
+        return res.status(400).json({
+          message: payment
+            ? `Payment failed: ${payment.status}`
+            : "Payment creation failed",
+        });
+      }
+    } catch (error) {
+      order.status = "failed";
+      await order.save();
+      return res.status(400).json({
+        message: "Payment creation failed",
+        error: error.message,
+      });
+    }
+
+    // Update inventory
+    try {
+      for (const product of products) {
+        await inventoryService.makeRequest(
+          "PUT",
+          `/api/products/${product.productId}/reduce-stock`,
+          { quantity: product.quantity }
+        );
+      }
+    } catch (error) {
+      // If inventory update fails, mark order as failed and attempt to refund
+      order.status = "failed";
+      await order.save();
+      await paymentService.makeRequest(
+        "POST",
+        `/api/payments/${payment._id}/refund`
+      );
+      throw error;
+    }
+
+    // Update order with payment info and confirm it
+    order.paymentId = payment._id;
+    order.status = "confirmed";
 
     await order.save();
     res.status(201).json(order);
