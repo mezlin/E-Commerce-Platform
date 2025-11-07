@@ -8,6 +8,10 @@ terraform {
             source = "hashicorp/helm"
             version = "3.0.0"
         }
+        /*docker = {
+            source = "kreuzwerker/docker"
+            version = "2.22.0"
+        }*/
     }
 }
 
@@ -20,3 +24,6 @@ provider "helm" {
         config_path = "~/.kube/config"
     }
 }
+/*provider "docker" {
+    host = "tcp://localhost:2375/"
+}*/
