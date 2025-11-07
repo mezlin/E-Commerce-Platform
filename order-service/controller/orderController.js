@@ -1,13 +1,66 @@
-const Order = require('../models/Order');
+const Order = require("../models/Order");
+const ServiceCommunication = require("../utils/ServiceCommunication");
+
+const inventoryService = new ServiceCommunication("http://localhost:4001");
+const paymentService = new ServiceCommunication("http://localhost:4003");
 
 // Create a new order
 exports.createOrder = async (req, res) => {
   try {
-    const order = new Order(req.body);
+    const { userId, products, totalAmount } = req.body;
+
+    // Check inventory for all products
+    for (const product of products) {
+      const inventoryCheck = await inventoryService.makeRequest(
+        "GET",
+        `/api/products/${product.productId}`
+      );
+
+      if (!inventoryCheck || inventoryCheck.quantity < product.quantity) {
+        return res.status(400).json({
+          message: `Insufficient inventory for product ${product.productId}`,
+        });
+      }
+    }
+
+    // Create payment
+    const payment = await paymentService.makeRequest("POST", "/api/payments", {
+      amount: totalAmount,
+      userId,
+    });
+
+    if (!payment || payment.status !== "success") {
+      return res.status(400).json({
+        message: "Payment failed",
+      });
+    }
+
+    // Update inventory
+    for (const product of products) {
+      await inventoryService.makeRequest(
+        "PUT",
+        `/api/products/${product.productId}/reduce-stock`,
+        { quantity: product.quantity }
+      );
+    }
+
+    // Create order
+    const order = new Order({
+      userId,
+      products,
+      totalAmount,
+      paymentId: payment.id,
+      status: "confirmed",
+    });
+
     await order.save();
     res.status(201).json(order);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    console.error("Order creation error:", error);
+    res.status(500).json({
+      message: "Error creating order",
+      error: error.message,
+    });
   }
 };
 
@@ -26,7 +79,7 @@ exports.getOrderById = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
     if (!order) {
-      return res.status(404).json({ message: 'Order not found' });
+      return res.status(404).json({ message: "Order not found" });
     }
     res.json(order);
   } catch (error) {
@@ -39,12 +92,12 @@ exports.updateOrderStatus = async (req, res) => {
   try {
     const order = await Order.findById(req.params.id);
     if (!order) {
-      return res.status(404).json({ message: 'Order not found' });
+      return res.status(404).json({ message: "Order not found" });
     }
-    
+
     order.status = req.body.status;
     await order.save();
-    
+
     res.json(order);
   } catch (error) {
     res.status(400).json({ message: error.message });

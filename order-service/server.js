@@ -16,9 +16,11 @@ mongoose.connect(process.env.MONGODB_URI)
 
 // Import routes
 const orderRoutes = require('./routes/orderRoutes');
+const healthRoutes = require('./routes/healthRoutes');
 
 // Use routes
 app.use('/api/orders', orderRoutes);
+app.use('/api', healthRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
