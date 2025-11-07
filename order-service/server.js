@@ -1,7 +1,15 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-require('dotenv').config();
+const path = require("path");
+const dotenv = require("dotenv");
+
+// Determine which .env file to load
+const envFile = process.env.NODE_ENV === "production" 
+    ? ".env.production" 
+    : ".env.development";
+
+dotenv.config({ path: path.resolve(__dirname, envFile) });
 
 const app = express();
 
@@ -16,9 +24,11 @@ mongoose.connect(process.env.MONGODB_URI)
 
 // Import routes
 const orderRoutes = require('./routes/orderRoutes');
+const healthRoutes = require('./routes/healthRoutes');
 
 // Use routes
 app.use('/api/orders', orderRoutes);
+app.use('/api', healthRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

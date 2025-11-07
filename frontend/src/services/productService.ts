@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:4001/api';
+const API_URL = process.env.REACT_APP_INVENTORY_API_URL || 'http://localhost:4001/api';
 
 export interface ProductCreateData {
   name: string;

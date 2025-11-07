@@ -1,14 +1,21 @@
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-const path = require('path');
-const fs = require('fs');
-require('dotenv').config();
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
+const path = require("path");
+const fs = require("fs");
+const dotenv = require("dotenv");
+
+// Determine which .env file to load
+const envFile = process.env.NODE_ENV === "production" 
+    ? ".env.production" 
+    : ".env.development";
+
+dotenv.config({ path: path.resolve(__dirname, envFile) });
 
 const app = express();
 
 // Ensure uploads directory exists
-const uploadsDir = path.join(__dirname, 'uploads');
+const uploadsDir = path.join(__dirname, "uploads");
 if (!fs.existsSync(uploadsDir)) {
   fs.mkdirSync(uploadsDir, { recursive: true });
 }
@@ -16,23 +23,26 @@ if (!fs.existsSync(uploadsDir)) {
 // Middleware
 app.use(cors());
 app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Serve uploaded files
+app.use("/uploads", express.static(path.join(__dirname, "uploads"))); // Serve uploaded files
 
 // Database connection
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('Connected to MongoDB'))
-  .catch((err) => console.error('Could not connect to MongoDB:', err));
+mongoose
+  .connect(process.env.MONGODB_URI)
+  .then(() => console.log("Connected to MongoDB"))
+  .catch((err) => console.error("Could not connect to MongoDB:", err));
 
 // Import routes
-const productRoutes = require('./routes/productRoutes');
+const productRoutes = require("./routes/productRoutes");
+const healthRoutes = require("./routes/healthRoutes");
 
 // Use routes
-app.use('/api/products', productRoutes);
+app.use("/api/products", productRoutes);
+app.use("/api", healthRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
-  res.status(500).send('Something broke!');
+  res.status(500).send("Something broke!");
 });
 
 const PORT = process.env.PORT || 4001;
