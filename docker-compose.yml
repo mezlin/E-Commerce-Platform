@@ -1,0 +1,106 @@
+version: "3.8"
+
+services:
+  # Frontend Service
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80" # host:container
+    environment:
+      - REACT_APP_USER_API_URL=http://user-service:4000
+      - REACT_APP_INVENTORY_API_URL=http://inventory-service:4001
+      - REACT_APP_ORDER_API_URL=http://order-service:4002
+      - REACT_APP_PAYMENT_API_URL=http://payment-service:4003
+      - NODE_ENV=development
+    depends_on:
+      - user-service
+      - inventory-service
+      - order-service
+      - payment-service
+
+  # User Service
+  user-service:
+    build: ./user-service
+    ports:
+      - "4000:4000"
+    environment:
+      - PORT=4000
+      - MONGODB_URI=mongodb://user-db:27017/user-db
+      - JWT_SECRET="dla;hdf;ajklsdfahsd;flkasdfnsjfhlas"
+      - NODE_ENV=development
+    depends_on:
+      - user-db
+
+  user-db:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    volumes:
+      - user-db-data:/data/db
+
+  # Inventory Service
+  inventory-service:
+    build: ./inventory-service
+    ports:
+      - "4001:4001"
+    environment:
+      - PORT=4001
+      - MONGODB_URI=mongodb://inventory-db:27017/inventory-db
+      - NODE_ENV=development
+    depends_on:
+      - inventory-db
+
+  inventory-db:
+    image: mongo:latest
+    ports:
+      - "27018:27017"
+    volumes:
+      - inventory-db-data:/data/db
+
+  # Order Service
+  order-service:
+    build: ./order-service
+    ports:
+      - "4002:4002"
+    environment:
+      - PORT=4002
+      - MONGODB_URI=mongodb://order-db:27017/order-db
+      - NODE_ENV=development
+      - INVENTORY_SERVICE_URL=http://inventory-service:4001
+      - PAYMENT_SERVICE_URL=http://payment-service:4003
+    depends_on:
+      - order-db
+      - inventory-service
+      - payment-service
+
+  order-db:
+    image: mongo:latest
+    ports:
+      - "27019:27017"
+    volumes:
+      - order-db-data:/data/db
+
+  # Payment Service
+  payment-service:
+    build: ./payment-service
+    ports:
+      - "4003:4003"
+    environment:
+      - PORT=4003
+      - MONGODB_URI=mongodb://payment-db:27017/payment-db
+      - NODE_ENV=development
+    depends_on:
+      - payment-db
+
+  payment-db:
+    image: mongo:latest
+    ports:
+      - "27020:27017"
+    volumes:
+      - payment-db-data:/data/db
+
+volumes:
+  user-db-data:
+  inventory-db-data:
+  order-db-data:
+  payment-db-data:
