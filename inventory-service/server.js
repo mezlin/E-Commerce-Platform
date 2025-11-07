@@ -3,7 +3,14 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const path = require("path");
 const fs = require("fs");
-require("dotenv").config();
+const dotenv = require("dotenv");
+
+// Determine which .env file to load
+const envFile = process.env.NODE_ENV === "production" 
+    ? ".env.production" 
+    : ".env.development";
+
+dotenv.config({ path: path.resolve(__dirname, envFile) });
 
 const app = express();
 

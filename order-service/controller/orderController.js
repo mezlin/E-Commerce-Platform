@@ -1,8 +1,17 @@
 const Order = require("../models/Order");
 const ServiceCommunication = require("../utils/ServiceCommunication");
+const path = require("path");
+const dotenv = require("dotenv");
 
-const inventoryService = new ServiceCommunication("http://localhost:4001");
-const paymentService = new ServiceCommunication("http://localhost:4003");
+// Determine which .env file to load
+const envFile = process.env.NODE_ENV === "production"
+? ".env.production"
+: ".env.development";
+
+dotenv.config({ path: path.resolve(__dirname, envFile) });
+
+const inventoryService = new ServiceCommunication(process.env.INVENTORY_SERVICE_URL);
+const paymentService = new ServiceCommunication(process.env.PAYMENT_SERVICE_URL);
 
 // Create a new order
 exports.createOrder = async (req, res) => {

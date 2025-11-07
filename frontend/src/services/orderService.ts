@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:4000/api';
+const API_URL = process.env.REACT_APP_ORDER_API_URL || 'http://localhost:4002/api';
 
 const getAuthHeader = () => {
   const user = localStorage.getItem('user');
