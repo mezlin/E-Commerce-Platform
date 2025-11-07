@@ -33,6 +33,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   image,
 }) => {
   const dispatch = useDispatch();
+  const [imageError, setImageError] = useState(false);
 
   const handleAddToCart = () => {
     dispatch(
@@ -83,11 +84,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
       <CardMedia
         component="img"
         height="200"
-        image={
-          image
-            ? `http://localhost:4001${image}`
-            : "https://via.placeholder.com/200"
-        }
+        image={`${process.env.REACT_APP_INVENTORY_API_URL}${image}` || "https://via.placeholder.com/200"}
         alt={name}
         sx={{
           transition: "transform 0.3s ease-in-out",

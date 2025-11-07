@@ -7,7 +7,7 @@ exports.uploadImage = async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ message: "No file uploaded" });
     }
-    // Return the file path that can be used to access the image
+    // Return the complete URL that can be used to access the image
     const imageUrl = `/uploads/${req.file.filename}`;
     res.status(200).json({ imageUrl });
   } catch (error) {
