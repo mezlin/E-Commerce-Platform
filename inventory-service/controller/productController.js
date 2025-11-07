@@ -1,4 +1,5 @@
 const Product = require("../models/Product");
+const { itemsInStockTotal, itemsSoldTotal } = require('../../metrics/inventoryMetrics');
 
 // Handle image upload
 exports.uploadImage = async (req, res) => {
@@ -19,6 +20,8 @@ exports.createProduct = async (req, res) => {
   try {
     const product = new Product(req.body);
     await product.save();
+
+    itemsInStockTotal.inc();
     res.status(201).json(product);
   } catch (error) {
     res.status(400).json({ message: error.message });
@@ -70,6 +73,7 @@ exports.deleteProduct = async (req, res) => {
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
+    itemsInStockTotal.dec();
     res.json({ message: "Product deleted" });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -84,7 +88,15 @@ exports.updateQuantity = async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
+    if(product.quantity > req.body.quantity) {
+      itemsInStockTotal.dec();
+    }
+    else if(product.quantity < req.body.quantity) {
+      itemsInStockTotal.inc();
+    }
+    
     product.quantity = req.body.quantity;
+
     await product.save();
 
     res.json(product);
@@ -109,6 +121,9 @@ exports.reduceStock = async (req, res) => {
     product.quantity -= reduceBy;
     await product.save();
 
+    itemsInStockTotal.dec();
+    itemsSoldTotal.inc(reduceBy);
+    
     res.json(product);
   } catch (error) {
     res.status(400).json({ message: error.message });

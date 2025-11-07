@@ -6,3 +6,13 @@ crash.log
 *.tfvars
 *.tfvars.json
 
+.env
+
+node_modules/
+npm-debug.log
+
+.DS_Store
+.vscode/
+
+Thumbs.db
+ehthumbs.db

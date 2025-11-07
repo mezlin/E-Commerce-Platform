@@ -1,4 +1,5 @@
 const Payment = require('../models/Payment');
+const { paymentsProcessedTotal } = require('../../metrics/paymentMetrics');
 
 // Process payment
 exports.processPayment = async (req, res) => {
@@ -11,6 +12,8 @@ exports.processPayment = async (req, res) => {
     payment.transactionId = 'txn_' + Date.now();
     
     await payment.save();
+
+    paymentsProcessedTotal.inc();
     res.status(201).json(payment);
   } catch (error) {
     res.status(400).json({ message: error.message });

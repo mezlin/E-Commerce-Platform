@@ -2,6 +2,7 @@ const Order = require("../models/Order");
 const ServiceCommunication = require("../utils/ServiceCommunication");
 const path = require("path");
 const dotenv = require("dotenv");
+const { ordersTotal } = require("../../metrics/orderMetrics");
 
 // Determine which .env file to load
 const envFile = process.env.NODE_ENV === "production"
@@ -63,6 +64,8 @@ exports.createOrder = async (req, res) => {
     });
 
     await order.save();
+
+    ordersTotal.inc();
     res.status(201).json(order);
   } catch (error) {
     console.error("Order creation error:", error);

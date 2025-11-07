@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const { usersOnlineTotal, usersCreatedTotal } = require('../../metrics/userMetrics');
 
 // Register new user
 exports.register = async (req, res) => {
@@ -12,6 +13,8 @@ exports.register = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: '24h' }
     );
+
+    usersCreatedTotal.inc();
     
     res.status(201).json({ user, token });
   } catch (error) {
@@ -39,6 +42,8 @@ exports.login = async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: '24h' }
     );
+
+    usersOnlineTotal.inc();
     
     res.json({ user, token });
   } catch (error) {

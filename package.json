@@ -1,0 +1,15 @@
+{
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  },
+  "scripts": {
+    "start:user": "node -r ./user-service/tracing.js ./user-service/server.js",
+    "start:inventory": "node -r ./inventory-service/tracing.js ./inventory-service/server.js",
+    "start:order": "node -r ./order-service/tracing.js ./order-service/server.js",
+    "start:payment": "node -r ./payment-service/tracing.js ./payment-service/server.js",
+    "start:all": "concurrently \"npm:start:user\" \"npm:start:inventory\" \"npm:start:order\" \"npm:start:payment\""
+  },
+  "dependencies": {
+    "prom-client": "^15.1.3"
+  }
+}
