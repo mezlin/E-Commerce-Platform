@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
-const { usersOnlineTotal, usersCreatedTotal } = require('../../metrics/userMetrics');
+const { usersOnlineTotal, usersCreatedTotal } = require('../metrics/userMetrics');
 
 // Register new user
 exports.register = async (req, res) => {

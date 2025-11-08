@@ -1,5 +1,5 @@
 const client = require('prom-client');
-const { register } = require('./prometheus');
+const { register } = require('../metrics/prometheus');
 
 //Gauge for current items in stock
 const itemsInStock = new client.Gauge({

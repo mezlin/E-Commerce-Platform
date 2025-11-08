@@ -2,7 +2,7 @@ const Order = require("../models/Order");
 const ServiceCommunication = require("../utils/ServiceCommunication");
 const path = require("path");
 const dotenv = require("dotenv");
-const { ordersTotal } = require("../../metrics/orderMetrics");
+const { ordersTotal } = require("../metrics/orderMetrics");
 
 // Determine which .env file to load
 const envFile =

@@ -1,5 +1,5 @@
 const Payment = require('../models/Payment');
-const { paymentsProcessedTotal } = require('../../metrics/paymentMetrics');
+const { paymentsProcessedTotal } = require('../metrics/paymentMetrics');
 
 // Process payment
 exports.processPayment = async (req, res) => {

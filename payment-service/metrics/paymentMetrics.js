@@ -1,5 +1,5 @@
 const client = require('prom-client');
-const { register } = require('./prometheus');
+const { register } = require('../metrics/prometheus');
 
 //Counter for total payments processed
 const paymentsProcessedTotal = new client.Counter({

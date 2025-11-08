@@ -5,7 +5,7 @@ const register = new client.Registry();
 
 //Set default labels for all metrics
 register.setDefaultLabels({
-  app: 'monitoring-project'
+  app: 'order-service'
 });
 
 client.collectDefaultMetrics({ register });

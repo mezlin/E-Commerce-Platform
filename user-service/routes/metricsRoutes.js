@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const {register} = require('../../metrics/prometheus');
+const {register} = require('../metrics/prometheus');
 
 router.get('/metrics', async (req, res) => {
     try {

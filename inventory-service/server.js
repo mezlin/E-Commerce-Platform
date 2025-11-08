@@ -4,7 +4,7 @@ const cors = require("cors");
 const path = require("path");
 const fs = require("fs");
 const dotenv = require("dotenv");
-const { httpRequestDuration } = require('../metrics/prometheus.js');
+const { httpRequestDuration } = require('./metrics/prometheus');
 
 // Determine which .env file to load
 const envFile = process.env.NODE_ENV === "production" 

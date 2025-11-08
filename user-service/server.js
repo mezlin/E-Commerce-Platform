@@ -3,10 +3,10 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const path = require("path");
 const dotenv = require("dotenv");
-const { httpRequestDuration } = require('../metrics/prometheus');
+const { httpRequestDuration } = require('./metrics/prometheus');
 
 // Determine which .env file to load
-const envFile = process.env.NODE_ENV === "production" 
+const envFile = process.env.NODE_ENV === "production"
     ? ".env.production" 
     : ".env.development";
 
@@ -16,8 +16,12 @@ dotenv.config({ path: path.resolve(__dirname, envFile) });
 
 const app = express();
 
+const corsOptions = {
+  origin: 'http://localhost:3001' // This is the origin of your frontend
+};
+
 // Middleware
-app.use(cors());
+app.use(cors(corsOptions));
 app.use(express.json());
 
 //Metrics middleware

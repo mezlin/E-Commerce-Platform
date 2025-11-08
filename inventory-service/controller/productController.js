@@ -1,5 +1,5 @@
 const Product = require("../models/Product");
-const { itemsInStockTotal, itemsSoldTotal } = require('../../metrics/inventoryMetrics');
+const { itemsInStockTotal, itemsSoldTotal } = require('../metrics/inventoryMetrics');
 
 // Handle image upload
 exports.uploadImage = async (req, res) => {
