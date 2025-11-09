@@ -13,7 +13,11 @@ exports.processPayment = async (req, res) => {
     
     await payment.save();
 
-    paymentsProcessedTotal.inc();
+    // Increment payments counter with gateway and status
+    paymentsProcessedTotal.inc({ 
+      gateway: payment.paymentMethod || 'default',
+      status: payment.status 
+    });
     res.status(201).json(payment);
   } catch (error) {
     res.status(400).json({ message: error.message });

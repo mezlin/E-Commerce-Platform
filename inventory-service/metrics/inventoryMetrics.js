@@ -5,7 +5,7 @@ const { register } = require('../metrics/prometheus');
 const itemsInStock = new client.Gauge({
   name: 'inventory_items_in_stock',
   help: 'Current number of items in stock',
-  labelNames: ['item_sku'],
+  labelNames: ['product_id', 'product_name'],
   register: register
 });
 
@@ -13,7 +13,7 @@ const itemsInStock = new client.Gauge({
 const itemsSoldTotal = new client.Counter({
   name: 'inventory_items_sold_total',
   help: 'Total number of items sold',
-  labelNames: ['item_sku'],
+  labelNames: ['product_id', 'product_name'],
   register: register
 });
 

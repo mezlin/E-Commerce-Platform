@@ -45,7 +45,8 @@ exports.createOrder = async (req, res) => {
 
     await order.save();
 
-    ordersTotal.inc();
+    // Increment orders counter with status
+    ordersTotal.inc({ status: order.status });
     console.log("Order created with ID:", order._id);
 
     console.log(`Creating new payment for order ${order._id}`);

@@ -1,5 +1,5 @@
 const Product = require("../models/Product");
-const { itemsInStockTotal, itemsSoldTotal } = require('../metrics/inventoryMetrics');
+const { itemsInStock, itemsSoldTotal } = require('../metrics/inventoryMetrics');
 
 // Handle image upload
 exports.uploadImage = async (req, res) => {
@@ -21,7 +21,11 @@ exports.createProduct = async (req, res) => {
     const product = new Product(req.body);
     await product.save();
 
-    itemsInStockTotal.inc();
+    // Update the items in stock metric with the initial quantity
+    itemsInStock.set({ 
+      product_id: product._id.toString(),
+      product_name: product.name
+    }, product.quantity);
 
     res.status(201).json(product);
   } catch (error) {
@@ -74,7 +78,11 @@ exports.deleteProduct = async (req, res) => {
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
-    itemsInStockTotal.dec();
+    // Set the stock to 0 for the deleted product
+    itemsInStock.set({ 
+      product_id: product._id.toString(),
+      product_name: product.name
+    }, 0);
     res.json({ message: "Product deleted" });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -89,12 +97,20 @@ exports.updateQuantity = async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
+    // If quantity decreased, update the items sold counter
     if(product.quantity > req.body.quantity) {
-      itemsInStockTotal.dec();
+      const itemsSold = product.quantity - req.body.quantity;
+      itemsSoldTotal.inc({ 
+        product_id: product._id.toString(),
+        product_name: product.name
+      }, itemsSold);
     }
-    else if(product.quantity < req.body.quantity) {
-      itemsInStockTotal.inc();
-    }
+    
+    // Update the stock gauge with the new quantity
+    itemsInStock.set({ 
+      product_id: product._id.toString(),
+      product_name: product.name
+    }, req.body.quantity);
     
     product.quantity = req.body.quantity;
 
