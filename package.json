@@ -3,6 +3,7 @@
     "concurrently": "^9.2.1"
   },
   "scripts": {
+    "start:frontend": "cd frontend && npm start",
     "start:user": "node -r ./user-service/tracing.js ./user-service/server.js",
     "start:inventory": "node -r ./inventory-service/tracing.js ./inventory-service/server.js",
     "start:order": "node -r ./order-service/tracing.js ./order-service/server.js",

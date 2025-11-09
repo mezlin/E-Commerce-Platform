@@ -1,7 +1,6 @@
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_USER_API_URL || 'http://localhost:4000/api';
-
+const API_URL = `${process.env.REACT_APP_USER_API_URL || 'http://localhost:4000'}/api`;
 export interface LoginData {
   email: string;
   password: string;

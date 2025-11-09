@@ -26,6 +26,7 @@ const ProductDetailsPage: React.FC = () => {
       try {
         const res = await getProductById(id);
         setProduct(res.data);
+        console.log(product?.image);
       } catch (err) {
         console.error('Error fetching product:', err);
       }

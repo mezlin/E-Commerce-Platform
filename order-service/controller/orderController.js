@@ -5,10 +5,7 @@ const dotenv = require("dotenv");
 const { ordersTotal } = require("../metrics/orderMetrics");
 
 // Determine which .env file to load
-const envFile =
-  process.env.NODE_ENV === "production"
-    ? ".env.production"
-    : ".env.development";
+const envFile = ".env";
 
 dotenv.config({ path: path.resolve(__dirname, envFile) });
 

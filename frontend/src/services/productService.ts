@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = process.env.REACT_APP_INVENTORY_API_URL || 'http://localhost:4001/api';
+const API_URL = `${process.env.REACT_APP_INVENTORY_API_URL || 'http://localhost:4001'}/api`;
 
 export interface ProductCreateData {
   name: string;
@@ -25,7 +25,7 @@ export const uploadProductImage = async (file: File): Promise<string> => {
     },
   });
   // The server returns the full path that can be used to access the image
-  return `http://localhost:4001${response.data.imageUrl}`;
+  return response.data.imageUrl;
 };
 
 export const deleteProduct = (id: string) => axios.delete(`${API_URL}/products/${id}`);
