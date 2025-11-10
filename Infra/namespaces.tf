@@ -4,7 +4,7 @@ resource "kubernetes_namespace" "monitoring" {
   }
 }
 
-resource "kubernetes_namespace" "app-services" {
+resource "kubernetes_namespace" "app_services" {
   metadata {
     name = "app-services"
   }

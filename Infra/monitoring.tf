@@ -96,3 +96,48 @@ resource "kubernetes_service" "jaeger-service" {
         }
     }
 }
+
+# --- Service Monitors for Application Services (This tells Prometheus to find and scrape our new services) ---
+resource "kubernetes_manifest" "app-monitors" {
+  for_each = toset([
+    "frontend",
+    "user-service",
+    "inventory-service",
+    "order-service",
+    "payment-service",
+    "frontend-s2",
+    "user-s2",
+    "inventory-s2",
+    "order-s2",
+    "payment-s2"
+  ])
+
+  manifest = {
+    apiVersion = "monitoring.coreos.com/v1"
+    kind       = "ServiceMonitor"
+    metadata = {
+      name      = "${each.key}-monitor"
+      namespace = kubernetes_namespace.monitoring.metadata[0].name
+      labels = {
+        release = "monitoring-stack"
+      }
+    }
+    spec = {
+      namespaceSelector = {
+        matchNames = [
+          kubernetes_namespace.app_services.metadata[0].name
+        ]
+      }
+      selector = {
+        matchLabels = {
+          app = each.key
+        }
+      }
+      endpoints = [{
+        port = "http"
+        path = "/metrics"
+        interval = "15s"
+      }]
+    }
+  }
+}

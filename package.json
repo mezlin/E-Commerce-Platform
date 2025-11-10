@@ -8,7 +8,9 @@
     "start:inventory": "node -r ./inventory-service/tracing.js ./inventory-service/server.js",
     "start:order": "node -r ./order-service/tracing.js ./order-service/server.js",
     "start:payment": "node -r ./payment-service/tracing.js ./payment-service/server.js",
-    "start:all": "concurrently \"npm:start:user\" \"npm:start:inventory\" \"npm:start:order\" \"npm:start:payment\""
+    "start:all": "concurrently \"npm:start:user\" \"npm:start:inventory\" \"npm:start:order\" \"npm:start:payment\"",
+
+    "port-forward": "concurrently \"kubectl port-forward -n monitoring svc/monitoring-stack-grafana 3002:80\" \"kubectl port-forward -n monitoring svc/prometheus-operated 9090:9090\" \"kubectl port-forward -n monitoring svc/jaeger-service 16686:16686\" \"kubectl port-forward -n monitoring svc/jaeger-service 4318:4318\""
   },
   "dependencies": {
     "prom-client": "^15.1.3"
