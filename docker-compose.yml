@@ -3,7 +3,7 @@ version: "3.8"
 services:
   # Frontend Service
   frontend:
-    build: ./frontend
+    image: mezlin/frontend-service:latest
     ports:
       - "3001:80" # host:container
     environment:
@@ -20,7 +20,7 @@ services:
 
   # User Service
   user-service:
-    build: ./user-service
+    image: mezlin/user-service:latest
     ports:
       - "4000:4000"
     environment:
@@ -40,7 +40,7 @@ services:
 
   # Inventory Service
   inventory-service:
-    build: ./inventory-service
+    image: mezlin/inventory-service:latest
     ports:
       - "4001:4001"
     environment:
@@ -59,7 +59,7 @@ services:
 
   # Order Service
   order-service:
-    build: ./order-service
+    image: mezlin/order-service:latest
     ports:
       - "4002:4002"
     environment:
@@ -82,7 +82,7 @@ services:
 
   # Payment Service
   payment-service:
-    build: ./payment-service
+    image: mezlin/payment-service:latest
     ports:
       - "4003:4003"
     environment:
