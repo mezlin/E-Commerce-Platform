@@ -5,7 +5,7 @@ resource "kubernetes_secret" "user-db-secret" {
     }
 
     data = {
-        DATABASE_URI = base64encode("mongodb://user-db:27017/user-db")
+        MONGODB_URI = "mongodb://user-db-service:27017/user-db"
     }
 }
 
@@ -16,7 +16,7 @@ resource "kubernetes_secret" "order-db-secret" {
     }
 
     data = {
-        DATABASE_URI = base64encode("mongodb://order-db:27017/order-db")
+        MONGODB_URI = "mongodb://order-db-service:27017/order-db"
     }
 }
 
@@ -27,7 +27,7 @@ resource "kubernetes_secret" "inventory-db-secret" {
     }
 
     data = {
-        DATABASE_URI = base64encode("mongodb://inventory-db:27017/inventory-db")
+        MONGODB_URI = "mongodb://inventory-db-service:27017/inventory-db"
     }
 }
 
@@ -38,7 +38,7 @@ resource "kubernetes_secret" "payment-db-secret" {
     }
 
     data = {
-        DATABASE_URI = base64encode("mongodb://payment-db:27017/payment-db")
+        MONGODB_URI = "mongodb://payment-db-service:27017/payment-db"
     }
 }
 

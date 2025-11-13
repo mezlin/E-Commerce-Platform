@@ -1,19 +1,19 @@
 
 # --- Frontend Service ---
-resource "kubernetes_deployment" "frontend" {
+resource "kubernetes_deployment" "frontend-service" {
   metadata {
-    name      = "frontend"
+    name      = "frontend-service"
     namespace = kubernetes_namespace.app_services.metadata[0].name
-    labels    = { app = "frontend" }
+    labels    = { app = "frontend-service" }
   }
   spec {
     replicas = 1
-    selector { match_labels = { app = "frontend" } }
+    selector { match_labels = { app = "frontend-service" } }
     template {
-      metadata { labels = { app = "frontend" } }
+      metadata { labels = { app = "frontend-service" } }
       spec {
         container {
-          name              = "frontend"
+          name              = "frontend-service"
           image             = "mezlin/frontend-service:latest"
           image_pull_policy = "Always"
           port { container_port = 80 }
@@ -35,12 +35,12 @@ resource "kubernetes_service" "frontend-s2" {
     labels    = { app = "frontend-s2" } # For Prometheus
   }
   spec {
-    selector = { app = "frontend-s2" }
+    selector = { app = "frontend-service" }
     port {
       name        = "http"
       port        = 80
       target_port = 80
-    }
+    } 
   }
 }
 
@@ -72,6 +72,11 @@ resource "kubernetes_deployment" "user-service" {
               name = kubernetes_secret.user-service-secret.metadata[0].name
             }
           }
+          env_from {
+            secret_ref {
+              name = kubernetes_secret.user-db-secret.metadata[0].name
+            }
+          }
         }
       }
     }
@@ -85,7 +90,7 @@ resource "kubernetes_service" "user-s2" {
     labels    = { app = "user-s2" } 
   }
   spec {
-    selector = { app = "user-s2" }
+    selector = { app = "user-service" }
     port {
       name        = "http"
       port        = 4000
@@ -117,6 +122,11 @@ resource "kubernetes_deployment" "inventory-service" {
               name = kubernetes_config_map.inventory-service-config.metadata[0].name
             }
           }
+          env_from {
+            secret_ref {
+              name = kubernetes_secret.inventory-db-secret.metadata[0].name
+            }
+          }
         }
       }
     }
@@ -130,7 +140,7 @@ resource "kubernetes_service" "inventory-s2" {
     labels    = { app = "inventory-s2" } 
   }
   spec {
-    selector = { app = "inventory-s2" }
+    selector = { app = "inventory-service" }
     port {
       name        = "http"
       port        = 4001
@@ -162,6 +172,11 @@ resource "kubernetes_deployment" "order-service" {
               name = kubernetes_config_map.order-service-config.metadata[0].name
             }
           }
+          env_from {
+            secret_ref {
+              name = kubernetes_secret.order-db-secret.metadata[0].name
+            }
+          }
         }
       }
     }
@@ -175,7 +190,7 @@ resource "kubernetes_service" "order-s2" {
     labels    = { app = "order-s2" }
   }
   spec {
-    selector = { app = "order-s2" }
+    selector = { app = "order-service" }
     port {
       name        = "http"
       port        = 4002
@@ -207,6 +222,11 @@ resource "kubernetes_deployment" "payment-service" {
               name = kubernetes_config_map.payment-service-config.metadata[0].name
             }
           }
+          env_from {
+            secret_ref {
+              name = kubernetes_secret.payment-db-secret.metadata[0].name
+            }
+          }
         }
       }
     }
@@ -220,7 +240,7 @@ resource "kubernetes_service" "payment-s2" {
     labels    = { app = "payment-s2" } 
   }
   spec {
-    selector = { app = "payment-s2" }
+    selector = { app = "payment-service" }
     port {
       name        = "http"
       port        = 4003
@@ -229,7 +249,7 @@ resource "kubernetes_service" "payment-s2" {
   }
 }
 
-# --- Ingress - This is the single entrypoint that routes traffic and solves CORS ---
+# --- Ingress ---
 resource "kubernetes_ingress_v1" "main-ingress" {
   metadata {
     name      = "main-ingress"
@@ -237,10 +257,6 @@ resource "kubernetes_ingress_v1" "main-ingress" {
     annotations = {
       # Use the Nginx Ingress Controller
       "kubernetes.io/ingress.class" = "nginx"
-      
-      # Rewrite /api/users to / for the user-service
-      "nginx.ingress.kubernetes.io/use-regex" = "true"
-      "nginx.ingress.kubernetes.io/rewrite-target" = "/$2"
     }
   }
 
@@ -248,10 +264,23 @@ resource "kubernetes_ingress_v1" "main-ingress" {
     rule {
       http {
         # --- Backend API Routes ---
-        # Requests to /api/users... are sent to /... on the user-service
+
+        # --- User Route ---
         path {
           path_type = "Prefix"
-          path      = "/api/users(/|$)(.*)"
+          path      = "/api/users"
+          backend {
+            service {
+              name = kubernetes_service.user-s2.metadata[0].name
+              port { number = 4000 }
+            }
+          }
+        }
+
+        # --- Health/metrics Route User---
+        path {
+          path_type = "Prefix"
+          path      = "/api"
           backend {
             service {
               name = kubernetes_service.user-s2.metadata[0].name
@@ -261,7 +290,31 @@ resource "kubernetes_ingress_v1" "main-ingress" {
         }
         path {
           path_type = "Prefix"
-          path      = "/api/inventory(/|$)(.*)"
+          path      = "/api"
+          backend {
+            service {
+              name = kubernetes_service.user-s2.metadata[0].name
+              port { number = 4000 }
+            }
+          }
+        }
+
+        # --- Inventory Route ---
+        path {
+          path_type = "Prefix"
+          path      = "/api/products"
+          backend {
+            service {
+              name = kubernetes_service.inventory-s2.metadata[0].name
+              port { number = 4001 }
+            }
+          }
+        }
+
+        # --- Health/metrics Route Inventory---
+        path {
+          path_type = "Prefix"
+          path      = "/api"
           backend {
             service {
               name = kubernetes_service.inventory-s2.metadata[0].name
@@ -271,7 +324,31 @@ resource "kubernetes_ingress_v1" "main-ingress" {
         }
         path {
           path_type = "Prefix"
-          path      = "/api/orders(/|$)(.*)"
+          path      = "/api"
+          backend {
+            service {
+              name = kubernetes_service.inventory-s2.metadata[0].name
+              port { number = 4001 }
+            }
+          }
+        }
+
+        # --- Order Route ---
+        path {
+          path_type = "Prefix"
+          path      = "/api/orders"
+          backend {
+            service {
+              name = kubernetes_service.order-s2.metadata[0].name
+              port { number = 4002 }
+            }
+          }
+        }
+
+        # --- Health/metrics Route Order---
+        path {
+          path_type = "Prefix"
+          path      = "/api"
           backend {
             service {
               name = kubernetes_service.order-s2.metadata[0].name
@@ -281,7 +358,41 @@ resource "kubernetes_ingress_v1" "main-ingress" {
         }
         path {
           path_type = "Prefix"
-          path      = "/api/payments(/|$)(.*)"
+          path      = "/api"
+          backend {
+            service {
+              name = kubernetes_service.order-s2.metadata[0].name
+              port { number = 4002 }
+            }
+          }
+        }
+
+        # --- Payment Route ---
+        path {
+          path_type = "Prefix"
+          path      = "/api/payments"
+          backend {
+            service {
+              name = kubernetes_service.payment-s2.metadata[0].name
+              port { number = 4003 }
+            }
+          }
+        }
+
+        # --- Health/metrics Route Payment---
+        path {
+          path_type = "Prefix"
+          path      = "/api"
+          backend {
+            service {
+              name = kubernetes_service.payment-s2.metadata[0].name
+              port { number = 4003 }
+            }
+          }
+        }
+        path {
+          path_type = "Prefix"
+          path      = "/api"
           backend {
             service {
               name = kubernetes_service.payment-s2.metadata[0].name
@@ -294,7 +405,7 @@ resource "kubernetes_ingress_v1" "main-ingress" {
         # All other traffic goes to the frontend
         path {
           path_type = "Prefix"
-          path      = "/(.*)"
+          path      = "/"
           backend {
             service {
               name = kubernetes_service.frontend-s2.metadata[0].name

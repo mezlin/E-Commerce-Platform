@@ -225,7 +225,7 @@ resource "kubernetes_deployment" "payment-db" {
 }
 resource "kubernetes_service" "payment-db-service" {
   metadata {
-    name      = "payment-db"
+    name      = "payment-db-service"
     namespace = kubernetes_namespace.app_services.metadata[0].name
   }
   spec {
