@@ -48,4 +48,4 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
 EXPOSE 4002
 
 # Start command
-CMD ["node", "server.js"]
+CMD ["node", "--require", "./tracing.js", "server.js"]

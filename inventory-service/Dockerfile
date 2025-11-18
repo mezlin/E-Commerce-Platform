@@ -51,4 +51,4 @@ VOLUME ["/app/uploads"]
 EXPOSE 4001
 
 # Start command
-CMD ["node", "server.js"]
+CMD ["node", "--require", "./tracing.js", "server.js"]
