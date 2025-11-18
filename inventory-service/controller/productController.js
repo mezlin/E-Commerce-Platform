@@ -1,6 +1,27 @@
 const Product = require("../models/Product");
 const { itemsInStock, itemsSoldTotal } = require('../metrics/inventoryMetrics');
 
+//Function to sync MongoDB data with Prometheus Gauge on startup
+exports.initializeMetrics = async () => {
+  try {
+    const products = await Product.find({});
+
+    //Reset the gauge to avoid stale data
+    itemsInStock.reset();
+
+    products.forEach(product => {
+      itemsInStock.set(
+        //Set the gauge value for each product
+        {product_id: product._id.toString(), product_name: product.name},
+        product.quantity
+      );
+      console.log('Metrics initialized with current data');
+    })
+  } catch (error) {
+    console.error('Error initializing metrics:', error);
+  }
+}
+
 // Handle image upload
 exports.uploadImage = async (req, res) => {
   try {

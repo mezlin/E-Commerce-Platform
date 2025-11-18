@@ -5,6 +5,8 @@ const path = require("path");
 const fs = require("fs");
 const dotenv = require("dotenv");
 const { httpRequestDuration } = require('./metrics/prometheus');
+const {itemsInStock, itemsSoldTotal} = require('./metrics/inventoryMetrics');
+const {initializeMetrics} = require('./controller/productController');
 
 // Determine which .env file to load
 const envFile = ".env" 
@@ -45,6 +47,9 @@ mongoose
   .connect(process.env.MONGODB_URI)
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error("Could not connect to MongoDB:", err));
+
+// Initialize metrics on startup
+initializeMetrics();
 
 // Import routes
 const productRoutes = require("./routes/productRoutes");
