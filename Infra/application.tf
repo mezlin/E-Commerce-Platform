@@ -257,6 +257,7 @@ resource "kubernetes_ingress_v1" "main-ingress" {
     annotations = {
       # Use the Nginx Ingress Controller
       "kubernetes.io/ingress.class" = "nginx"
+      "nginx.ingress.kubernetes.io/proxy-body-size" = "25m"
     }
   }
 

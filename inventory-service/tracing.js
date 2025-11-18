@@ -9,7 +9,7 @@ const SERVICE_NAME = process.env.npm_package_name || 'inventory-service';
 
 //Configure OTLP exporter to send to Jaeger
 const exporter = new OTLPTraceExporter({
-    url: 'http://localhost:4318/v1/traces', // Jaeger OTLP endpoint
+    url: process.env.JAEGER_URL || 'http://localhost:4318/v1/traces', // Jaeger OTLP endpoint
 });
 
 //Configure OTel SDK

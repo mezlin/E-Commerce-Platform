@@ -100,11 +100,12 @@ resource "kubernetes_service" "jaeger-service" {
 # --- Service Monitors for Application Services (This tells Prometheus to find and scrape our new services) ---
 resource "kubernetes_manifest" "app-monitors" {
   for_each = toset([
-    "frontend-service",
-    "user-service",
-    "inventory-service",
-    "order-service",
-    "payment-service"
+    "user-s2",
+    "inventory-s2",
+    "order-s2",
+    "payment-s2",
+    "user-service"
+
   ])
 
   manifest = {
@@ -130,7 +131,7 @@ resource "kubernetes_manifest" "app-monitors" {
       }
       endpoints = [{
         port = "http"
-        path = "/metrics"
+        path = "/api/metrics"
         interval = "15s"
       }]
     }

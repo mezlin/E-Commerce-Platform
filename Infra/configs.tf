@@ -22,6 +22,7 @@ resource "kubernetes_config_map" "user-service-config" {
     PORT        = "4000"
     JWT_SECRET  = kubernetes_secret.user-service-secret.data["JWT_SECRET"]
     NODE_ENV    = "development"
+    JAEGER_URL  = "http://jaeger-service.monitoring.svc.cluster.local:4318/v1/traces"
   }
 }
 
@@ -34,6 +35,7 @@ resource "kubernetes_config_map" "inventory-service-config" {
   data = {
     PORT        = "4001"
     NODE_ENV    = "development"
+    JAEGER_URL  = "http://jaeger-service.monitoring.svc.cluster.local:4318/v1/traces"
   }
 }
 
@@ -46,8 +48,9 @@ resource "kubernetes_config_map" "order-service-config" {
   data = {
     PORT                  = "4002"
     NODE_ENV              = "development"
-    INVENTORY_SERVICE_URL = "http://inventory-service:4001"
-    PAYMENT_SERVICE_URL   = "http://payment-service:4003"
+    INVENTORY_SERVICE_URL = "http://inventory-s2:4001"
+    PAYMENT_SERVICE_URL   = "http://payment-s2:4003"
+    JAEGER_URL  = "http://jaeger-service.monitoring.svc.cluster.local:4318/v1/traces"
   }
 }
 
@@ -60,5 +63,6 @@ resource "kubernetes_config_map" "payment-service-config" {
   data = {
     PORT        = "4003"
     NODE_ENV    = "development"
+    JAEGER_URL  = "http://jaeger-service.monitoring.svc.cluster.local:4318/v1/traces"
   }
 }
