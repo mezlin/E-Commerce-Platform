@@ -159,8 +159,21 @@ exports.reduceStock = async (req, res) => {
     product.quantity -= reduceBy;
     await product.save();
 
-    itemsInStockTotal.dec();
-    itemsSoldTotal.inc(reduceBy);
+    itemsInStock.set(
+      {
+        product_id: product._id.toString(),
+        product_name: product.name
+      },
+      product.quantity
+    );
+    
+    itemsSoldTotal.inc(
+      { 
+      product_id: product._id.toString(),
+      product_name: product.name
+      }, 
+      reduceBy
+    );
     
     res.json(product);
   } catch (error) {
