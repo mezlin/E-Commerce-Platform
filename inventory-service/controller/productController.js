@@ -159,24 +159,36 @@ exports.reduceStock = async (req, res) => {
     product.quantity -= reduceBy;
     await product.save();
 
-    itemsInStock.set(
+    if(itemsInStock) {
+      itemsInStock.set(
       {
         product_id: product._id.toString(),
         product_name: product.name
       },
-      product.quantity
-    );
+        product.quantity
+      );
+    }
+    else {
+      console.warn("WARNING: itemsInStock metric is UNDEFINED. Check your imports.");
+    }
     
-    itemsSoldTotal.inc(
+    if(itemsSoldTotal) {
+      itemsSoldTotal.inc(
       { 
-      product_id: product._id.toString(),
-      product_name: product.name
+        product_id: product._id.toString(),
+        product_name: product.name
       }, 
-      reduceBy
-    );
+        reduceBy
+      );
+    }
+    else {
+      console.warn("WARNING: itemsSoldTotal metric is UNDEFINED. Check your imports.");
+    }
+    
     
     res.json(product);
   } catch (error) {
+    console.error("Critical ERROR:", error);
     res.status(400).json({ message: error.message });
   }
 };

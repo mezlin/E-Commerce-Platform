@@ -5,6 +5,7 @@
 crash.log
 *.tfvars
 *.tfvars.json
+.terraform.lock.hcl
 
 .env
 
